@@ -171,12 +171,6 @@
 
     const URL_BASE_DATOS = "https://script.google.com/macros/s/AKfycbzUleqHaFAA4Ohula3UwJmDq9zAmmqwuoAWWVJ6JyO3ZFOjxMnmnQzZA7bxNJ4EVLl-/exec";
 
-    // Mapeo numérico a Romano para las 7 Regiones Sanitarias de Corrientes
-    const MAPA_ROMANOS = {
-      '1': 'I', '2': 'II', '3': 'III', '4': 'IV', '5': 'V', '6': 'VI', '7': 'VII',
-      'I': 'I', 'II': 'II', 'III': 'III', 'IV': 'IV', 'V': 'V', 'VI': 'VI', 'VII': 'VII'
-    };
-
     function initApp() {
       map = L.map('map', { preferCanvas: true }).setView([-28.5, -57.8], 7);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
@@ -337,34 +331,30 @@
         fetch('./regiones_sanitarias.json')
           .then(res => res.json())
           .then(data => {
+            let contadorRegion = 0;
+            const romanosNombres = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
+
             capaRegionesSanitarias = L.geoJSON(data, {
               style: function() {
                 return {
-                  color: '#28a745',      // Verde oficial de la regionalización sanitaria
-                  weight: 3,             // Grosor de línea definido
+                  color: '#28a745',      // Verde institucional
+                  weight: 3,
                   opacity: 0.9,
                   fillColor: '#28a745',
-                  fillOpacity: 0.12      // Relleno leve para resaltar la zona completa
+                  fillOpacity: 0.12      // Relleno leve
                 };
               },
               onEachFeature: function(feature, layer) {
-                const props = feature.properties || {};
-                let rawId = String(props.REGION || props.region || props.nam || props.nombre || props.id || '').trim();
-                
-                // Extraer el identificador o número romano
-                let idLimpio = rawId.replace(/[^0-9I-VIX]/gi, '');
-                let romano = MAPA_ROMANOS[idLimpio] || idLimpio || rawId || 'I';
+                const indexRomano = contadorRegion % romanosNombres.length;
+                const nombreRegion = `Región Sanitaria Nº ${romanosNombres[indexRomano]}`;
+                contadorRegion++;
 
-                let nombreRegion = `Región Sanitaria Nº ${romano}`;
-
-                // Tooltip interactivo centrado que aparece al pasar el cursor
                 layer.bindTooltip(`<b>${nombreRegion}</b>`, {
                   permanent: false,
                   direction: 'center',
                   className: 'dept-tooltip'
                 });
 
-                // Efectos dinámicos al pasar el mouse (Hover)
                 layer.on({
                   mouseover: function(e) {
                     const l = e.target;
