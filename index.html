@@ -65,7 +65,17 @@
     #map { flex: 1; height: 100%; background: #191a1a; width: 100%; z-index: 1; }
     
     .btn-sec { background:#2c2c2e; border:1px solid #3a3a3c; color:#fff; padding:6px 10px; border-radius:5px; cursor:pointer; font-size: 0.75rem; white-space: nowrap; font-weight: 600; }
-    .dept-tooltip { background: rgba(0, 0, 0, 0.85); border: 1px solid #0a84ff; color: #fff; font-weight: bold; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; }
+    
+    .dept-tooltip { 
+      background: rgba(18, 18, 18, 0.90) !important; 
+      border: 1px solid #28a745 !important; 
+      color: #ffffff !important; 
+      font-weight: bold; 
+      font-size: 0.82rem; 
+      padding: 5px 9px; 
+      border-radius: 5px; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4); 
+    }
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; padding: 12px; }
     .modal-overlay.active { opacity: 1; pointer-events: auto; }
@@ -161,6 +171,12 @@
 
     const URL_BASE_DATOS = "https://script.google.com/macros/s/AKfycbzUleqHaFAA4Ohula3UwJmDq9zAmmqwuoAWWVJ6JyO3ZFOjxMnmnQzZA7bxNJ4EVLl-/exec";
 
+    // Mapeo numérico a Romano para las 7 Regiones Sanitarias de Corrientes
+    const MAPA_ROMANOS = {
+      '1': 'I', '2': 'II', '3': 'III', '4': 'IV', '5': 'V', '6': 'VI', '7': 'VII',
+      'I': 'I', 'II': 'II', 'III': 'III', 'IV': 'IV', 'V': 'V', 'VI': 'VI', 'VII': 'VII'
+    };
+
     function initApp() {
       map = L.map('map', { preferCanvas: true }).setView([-28.5, -57.8], 7);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
@@ -177,7 +193,6 @@
       if (loadingEl) loadingEl.classList.remove('off');
 
       try {
-        // Intento directo a Apps Script
         const res = await fetch(URL_BASE_DATOS, { cache: 'no-store' });
         const data = await res.json();
         centrosData = data.centros || [];
@@ -185,7 +200,6 @@
       } catch (err) {
         console.warn("Fallo fetch directo por política CORS, reintentando vía proxy...", err);
         try {
-          // Fallback seguro usando proxy público
           const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(URL_BASE_DATOS);
           const resProxy = await fetch(proxyUrl);
           const data = await resProxy.json();
@@ -324,17 +338,62 @@
           .then(res => res.json())
           .then(data => {
             capaRegionesSanitarias = L.geoJSON(data, {
-              style: () => ({ color: '#9b59b6', weight: 2.5, opacity: 0.95, fillOpacity: 0 }),
-              onEachFeature: (feature, layer) => {
-                layer.bindTooltip('Región Sanitaria', { permanent: false, direction: 'center', className: 'dept-tooltip' });
+              style: function() {
+                return {
+                  color: '#28a745',      // Verde oficial de la regionalización sanitaria
+                  weight: 3,             // Grosor de línea definido
+                  opacity: 0.9,
+                  fillColor: '#28a745',
+                  fillOpacity: 0.12      // Relleno leve para resaltar la zona completa
+                };
+              },
+              onEachFeature: function(feature, layer) {
+                const props = feature.properties || {};
+                let rawId = String(props.REGION || props.region || props.nam || props.nombre || props.id || '').trim();
+                
+                // Extraer el identificador o número romano
+                let idLimpio = rawId.replace(/[^0-9I-VIX]/gi, '');
+                let romano = MAPA_ROMANOS[idLimpio] || idLimpio || rawId || 'I';
+
+                let nombreRegion = `Región Sanitaria Nº ${romano}`;
+
+                // Tooltip interactivo centrado que aparece al pasar el cursor
+                layer.bindTooltip(`<b>${nombreRegion}</b>`, {
+                  permanent: false,
+                  direction: 'center',
+                  className: 'dept-tooltip'
+                });
+
+                // Efectos dinámicos al pasar el mouse (Hover)
+                layer.on({
+                  mouseover: function(e) {
+                    const l = e.target;
+                    l.setStyle({
+                      weight: 5,
+                      color: '#155724',
+                      fillOpacity: 0.35
+                    });
+                    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+                      l.bringToFront();
+                    }
+                  },
+                  mouseout: function(e) {
+                    capaRegionesSanitarias.resetStyle(e.target);
+                  },
+                  click: function(e) {
+                    map.fitBounds(e.target.getBounds(), { padding: [20, 20] });
+                  }
+                });
               }
             });
             capaRegionesSanitarias.addTo(map);
             regionesSanitariasVisibles = true;
-            actualizarEstiloBoton('btn-toggle-rs', true, '#9b59b6');
-          });
+            actualizarEstiloBoton('btn-toggle-rs', true, '#28a745');
+          })
+          .catch(err => console.error("Error al cargar regiones sanitarias:", err));
         return;
       }
+
       if (regionesSanitariasVisibles) { 
         map.removeLayer(capaRegionesSanitarias); 
         regionesSanitariasVisibles = false; 
@@ -342,7 +401,7 @@
       } else { 
         map.addLayer(capaRegionesSanitarias); 
         regionesSanitariasVisibles = true; 
-        actualizarEstiloBoton('btn-toggle-rs', true, '#9b59b6');
+        actualizarEstiloBoton('btn-toggle-rs', true, '#28a745');
       }
     }
 
