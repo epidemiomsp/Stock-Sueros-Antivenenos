@@ -11,7 +11,7 @@
   <style>
     :root {
       --bg:#f4f6f9; --card:#ffffff; --border:#dcdfe6; --txt:#1c1c1e; --txt-dim:#666666;
-      --primary:#f39c12; /* Naranja de la paleta cromática oficial del Ministerio */
+      --primary:#f39c12; /* Naranja oficial de la paleta del Ministerio */
       --primary-hover:#d68910;
       --success:#28a745; /* Verde institucional de Regiones Sanitarias */
       --danger:#e63946;
@@ -20,7 +20,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--txt); height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
     
-    /* Header Institucional en Naranja Oficial */
+    /* Header Institucional Naranja con Textos y Letras en Negro */
     header { 
       background: var(--primary); 
       border-bottom: 3px solid var(--primary-hover); 
@@ -33,8 +33,8 @@
       gap: 6px; 
       box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     }
-    .title-area h1 { font-size: 1rem; color: #ffffff; line-height: 1.2; font-weight: 700; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-    .title-area p { font-size: 0.7rem; color: #fff8ef; }
+    .title-area h1 { font-size: 1rem; color: #1c1c1e; line-height: 1.2; font-weight: 800; }
+    .title-area p { font-size: 0.72rem; color: #2c3e50; font-weight: 600; }
     .header-actions { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; }
     .container { display: flex; flex: 1; position: relative; height: calc(100vh - 55px); height: calc(100dvh - 55px); overflow: hidden; }
     
@@ -56,7 +56,7 @@
     .tab-btn { flex: 1; padding: 10px 2px; font-size: 0.78rem; background: transparent; border: none; color: #475569; cursor: pointer; border-bottom: 2px solid transparent; text-align: center; font-weight: bold; }
     .tab-btn.active { color: var(--primary-hover); border-bottom-color: var(--primary); background: #ffffff; }
 
-    /* Barra de Búsqueda de Centros */
+    /* Buscador en tiempo real */
     .search-bar { padding: 10px; background: #ffffff; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .search-input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.78rem; outline: none; background: #f8fafc; color: #1c1c1e; }
     .search-input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 2px rgba(243,156,18,0.2); }
@@ -69,14 +69,30 @@
     .item-card:hover { border-color: var(--primary); box-shadow: 0 4px 8px rgba(0,0,0,0.08); }
     .item-title { font-weight: bold; color: #2c3e50; margin-bottom: 2px; font-size: 0.85rem; }
     .item-sub { color: #64748b; font-size: 0.72rem; margin-top: 2px; }
-    .item-badge { display: inline-block; padding: 3px 6px; border-radius: 4px; font-size: 0.68rem; background: #f1f5f9; color: #334155; margin-top: 5px; font-weight: 600; }
+    .item-badge { display: inline-block; padding: 3px 6px; border-radius: 4px; font-size: 0.68rem; background: #e5e5ea; color: #333; margin-top: 5px; font-weight: 600; }
     .badge-si { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
     .badge-no { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
     #map { flex: 1; height: 100%; background: #e2e8f0; width: 100%; z-index: 1; }
     
-    .btn-sec { background: rgba(255,255,255,0.22); border: 1px solid rgba(255,255,255,0.4); color:#fff; padding:6px 10px; border-radius:6px; cursor:pointer; font-size: 0.75rem; white-space: nowrap; font-weight: 600; transition: background 0.2s; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
-    .btn-sec:hover { background: rgba(255,255,255,0.35); }
+    /* Botones de Cabecera en Texto Negro y Fondo Claro Transparente */
+    .btn-sec { 
+      background: rgba(255, 255, 255, 0.85); 
+      border: 1px solid rgba(0, 0, 0, 0.2); 
+      color: #1c1c1e; 
+      padding: 6px 10px; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      font-size: 0.75rem; 
+      white-space: nowrap; 
+      font-weight: 700; 
+      transition: all 0.2s; 
+    }
+    .btn-sec:hover { 
+      background: #ffffff; 
+      border-color: #1c1c1e; 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+    }
     
     .dept-tooltip { 
       background: rgba(15, 23, 42, 0.90) !important; 
@@ -123,6 +139,7 @@
       <p>Vigilancia Epidemiológica - Ministerio de Salud Pública - Corrientes</p>
     </div>
     <div class="header-actions">
+      <button class="btn-sec" id="btn-toggle-centros" onclick="toggleCapaCentros()">🏥 Centros Salud</button>
       <button class="btn-sec" id="btn-toggle-dptos" onclick="toggleCapaDepartamentos()">🗺️ Departamentos</button>
       <button class="btn-sec" id="btn-toggle-rs" onclick="toggleCapaRegionesSanitarias()">🏥 Reg.Sanitarias</button>
       <button class="btn-sec" id="btn-toggle-info" onclick="toggleSidebar()">📊 Info</button>
@@ -174,7 +191,7 @@
         </div>
       </div>
       <div style="margin-top: 15px; text-align: right;">
-        <button type="button" class="btn-sec" style="background:var(--primary-hover); border:none;" onclick="cerrarModal('modalCentroDetalle')">Cerrar</button>
+        <button type="button" class="btn-sec" style="background:var(--primary-hover); color:#fff; border:none;" onclick="cerrarModal('modalCentroDetalle')">Cerrar</button>
       </div>
     </div>
   </div>
@@ -184,10 +201,22 @@
     let map = null;
     let markersCentros = [];
     let centrosData = [];
+    let centrosVisibles = true; // Control de la capa de centros de salud
     let capaDepartamentos = null, departamentosVisibles = false;
     let capaRegionesSanitarias = null, regionesSanitariasVisibles = false;
 
     const URL_BASE_DATOS = "https://script.google.com/macros/s/AKfycbzUleqHaFAA4Ohula3UwJmDq9zAmmqwuoAWWVJ6JyO3ZFOjxMnmnQzZA7bxNJ4EVLl-/exec";
+
+    // Asignación oficial de Departamentos a Regiones Sanitarias de Corrientes
+    const MAPEO_DEPTOS_A_REGION = {
+      'capital': 'I', 'empedrado': 'I', 'itati': 'I', 'san cosme': 'I', 'san luis del palmar': 'I',
+      'bella vista': 'II', 'concepcion': 'II', 'mburucuya': 'II', 'saladas': 'II', 'san roque': 'II',
+      'esquina': 'III', 'goya': 'III', 'lavalle': 'III',
+      'curuzu cuatia': 'IV', 'mercedes': 'IV', 'sauce': 'IV',
+      'general alvear': 'V', 'santo tome': 'V', 'san martin': 'V',
+      'monte caseros': 'VI', 'paso de los libres': 'VI',
+      'ituzaingo': 'VII', 'san miguel': 'VII', 'general paz': 'VII', 'beron de astrada': 'VII'
+    };
 
     function initApp() {
       map = L.map('map', { preferCanvas: true }).setView([-28.5, -57.8], 7);
@@ -262,7 +291,9 @@
             popupAnchor: [0, -32]
           });
 
-          const marker = L.marker([c.lat, c.lng], { icon: iconoSalud }).addTo(map);
+          const marker = L.marker([c.lat, c.lng], { icon: iconoSalud });
+          if (centrosVisibles) marker.addTo(map);
+
           marker.bindPopup(`
             <div style="color:#000; min-width: 200px;">
               <b style="font-size:0.95rem; color:#d68910;">${c.nombre}</b><br>
@@ -276,6 +307,22 @@
           markersCentros.push(marker);
         }
       });
+
+      actualizarEstiloBoton('btn-toggle-centros', centrosVisibles, '#3498db', '#ffffff');
+    }
+
+    // Función para mostrar / ocultar los marcadores de los Centros de Salud en el Mapa
+    function toggleCapaCentros() {
+      if (!map) return;
+      centrosVisibles = !centrosVisibles;
+      markersCentros.forEach(m => {
+        if (centrosVisibles) {
+          map.addLayer(m);
+        } else {
+          map.removeLayer(m);
+        }
+      });
+      actualizarEstiloBoton('btn-toggle-centros', centrosVisibles, '#3498db', '#ffffff');
     }
 
     function filtrarCentrosPorTexto(texto) {
@@ -342,7 +389,7 @@
             });
             capaDepartamentos.addTo(map);
             departamentosVisibles = true;
-            actualizarEstiloBoton('btn-toggle-dptos', true, '#005c8a');
+            actualizarEstiloBoton('btn-toggle-dptos', true, '#005c8a', '#ffffff');
           });
         return;
       }
@@ -353,35 +400,33 @@
       } else { 
         map.addLayer(capaDepartamentos); 
         departamentosVisibles = true; 
-        actualizarEstiloBoton('btn-toggle-dptos', true, '#005c8a');
+        actualizarEstiloBoton('btn-toggle-dptos', true, '#005c8a', '#ffffff');
       }
     }
 
     function toggleCapaRegionesSanitarias() {
       if (!map) return;
       if (!capaRegionesSanitarias) {
-        fetch('./regiones_sanitarias.json')
+        fetch('./corrientes.json')
           .then(res => res.json())
           .then(data => {
-            let contadorRegion = 0;
-            const romanosNombres = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
-
             capaRegionesSanitarias = L.geoJSON(data, {
               style: function() {
                 return {
                   color: '#28a745',      // Verde oficial de la regionalización sanitaria
-                  weight: 3,
-                  opacity: 0.9,
+                  weight: 2.5,
+                  opacity: 0.95,
                   fillColor: '#28a745',
-                  fillOpacity: 0.12
+                  fillOpacity: 0.15
                 };
               },
               onEachFeature: function(feature, layer) {
-                const indexRomano = contadorRegion % romanosNombres.length;
-                const nombreRegion = `Región Sanitaria Nº ${romanosNombres[indexRomano]}`;
-                contadorRegion++;
+                const props = feature.properties || {};
+                const nombreDepto = String(props.nam || props.nombre || '').toLowerCase().trim();
+                const romano = MAPEO_DEPTOS_A_REGION[nombreDepto] || 'I';
+                const nombreRegion = `Región Sanitaria Nº ${romano}`;
 
-                layer.bindTooltip(`<b>${nombreRegion}</b>`, {
+                layer.bindTooltip(`<b>${nombreRegion}</b><br><span style="font-size:0.7rem; font-weight:normal;">Dpto. ${props.nam || props.nombre}</span>`, {
                   permanent: false,
                   direction: 'center',
                   className: 'dept-tooltip'
@@ -391,9 +436,9 @@
                   mouseover: function(e) {
                     const l = e.target;
                     l.setStyle({
-                      weight: 5,
+                      weight: 4.5,
                       color: '#155724',
-                      fillOpacity: 0.35
+                      fillOpacity: 0.38
                     });
                     if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
                       l.bringToFront();
@@ -410,7 +455,7 @@
             });
             capaRegionesSanitarias.addTo(map);
             regionesSanitariasVisibles = true;
-            actualizarEstiloBoton('btn-toggle-rs', true, '#28a745');
+            actualizarEstiloBoton('btn-toggle-rs', true, '#28a745', '#ffffff');
           })
           .catch(err => console.error("Error al cargar regiones sanitarias:", err));
         return;
@@ -423,15 +468,16 @@
       } else { 
         map.addLayer(capaRegionesSanitarias); 
         regionesSanitariasVisibles = true; 
-        actualizarEstiloBoton('btn-toggle-rs', true, '#28a745');
+        actualizarEstiloBoton('btn-toggle-rs', true, '#28a745', '#ffffff');
       }
     }
 
-    function actualizarEstiloBoton(idBtn, activo, colorActivo = '#f39c12') {
+    function actualizarEstiloBoton(idBtn, activo, colorActivo = '#f39c12', colorTextoActivo = '#ffffff') {
       const btn = document.getElementById(idBtn);
       if (btn) {
-        btn.style.background = activo ? colorActivo : 'rgba(255,255,255,0.22)';
-        btn.style.borderColor = activo ? colorActivo : 'rgba(255,255,255,0.4)';
+        btn.style.background = activo ? colorActivo : 'rgba(255,255,255,0.85)';
+        btn.style.color = activo ? colorTextoActivo : '#1c1c1e';
+        btn.style.borderColor = activo ? colorActivo : 'rgba(0,0,0,0.2)';
       }
     }
 
