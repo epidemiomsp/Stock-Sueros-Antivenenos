@@ -33,7 +33,7 @@
     .container { display: flex; flex: 1; position: relative; height: calc(100vh - 50px); height: calc(100dvh - 50px); overflow: hidden; }
     
     #sidebar { 
-      width: 400px; 
+      width: 380px; 
       background: #ffffff; 
       color: #1c1c1e;
       border-right: 1px solid var(--border); 
@@ -44,7 +44,7 @@
       position: relative;
       transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    #sidebar.collapsed { transform: translateX(-400px); margin-right: -400px; }
+    #sidebar.collapsed { transform: translateX(-380px); margin-right: -380px; }
     
     .tab-bar { display: flex; border-bottom: 1px solid var(--border); background: #f2f2f7; min-height: 42px; align-items: center; flex-shrink: 0; }
     .tab-btn { flex: 1; padding: 10px 2px; font-size: 0.78rem; background: transparent; border: none; color: #555; cursor: pointer; border-bottom: 2px solid transparent; text-align: center; font-weight: bold; }
@@ -98,7 +98,7 @@
   <header>
     <div class="title-area">
       <h1>Stock de Sueros Antiponzoñosos</h1>
-      <p>Vigilancia Epidemiologica - Provincia de Corrientes</p>
+      <p>Vigilancia Epidemiológica - Provincia de Corrientes</p>
     </div>
     <div class="header-actions">
       <button class="btn-sec" id="btn-toggle-dptos" onclick="toggleCapaDepartamentos()">🗺️ Departamentos</button>
@@ -109,7 +109,7 @@
   </header>
 
   <div class="container">
-    <div id="loading" class="off">Cargando centros de salud y sueros...</div>
+    <div id="loading">Cargando centros de salud y sueros...</div>
 
     <div id="sidebar">
       <div class="tab-bar">
@@ -128,7 +128,7 @@
         <h3 id="det-nombre">Detalle del Centro</h3>
         <button class="close-modal" onclick="cerrarModal('modalCentroDetalle')">&times;</button>
       </div>
-      <img id="det-foto" class="centro-foto" src="" alt="Foto del Centro de Salud" onerror="this.src=''">
+      <img id="det-foto" class="centro-foto" src="" alt="Foto del Centro de Salud" onerror="this.style.display='none';">
       <div style="font-size: 0.8rem; line-height: 1.5;">
         <p><b>Localidad:</b> <span id="det-localidad">–</span></p>
         <p><b>Dirección:</b> <span id="det-direccion">–</span></p>
@@ -159,13 +159,14 @@
     let capaDepartamentos = null, departamentosVisibles = false;
     let capaRegionesSanitarias = null, regionesSanitariasVisibles = false;
 
-    // Reemplazar con la URL de tu Web App desplegada de Google Apps Script
-    const URL_BASE_DATOS = "AQUÍ_PEGAR_URL_DE_APPS_SCRIPT";
+    // URL de producción vinculada a tu script
+    const URL_BASE_DATOS = "https://script.google.com/macros/s/AKfycbzUleqHaFAA4Ohula3UwJmDq9zAmmqwuoAWWVJ6JyO3ZFOjxMnmnQzZA7bxNJ4EVLl-/exec";
 
     function initApp() {
       map = L.map('map', { preferCanvas: true }).setView([-28.5, -57.8], 7);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 
+      setTimeout(() => map.invalidateSize(), 300);
       cargarDatosActualizados();
     }
 
@@ -177,10 +178,7 @@
         centrosData = data.centros || [];
         renderCentros(centrosData);
       } catch (err) {
-        console.error("Error al cargar datos:", err);
-        // Datos de respaldo de muestra si no está conectado el script aún
-        centrosData = [];
-        renderCentros(centrosData);
+        console.error("Error al cargar datos de Apps Script:", err);
       } finally {
         document.getElementById('loading').classList.add('off');
       }
@@ -193,7 +191,7 @@
       markersCentros = [];
 
       if (!centros || centros.length === 0) {
-        listEl.innerHTML = '<div style="color:#666; font-size:0.75rem; text-align:center; padding:15px;">No hay centros registrados en la base de datos.</div>';
+        listEl.innerHTML = '<div style="color:#666; font-size:0.75rem; text-align:center; padding:15px;">No se encontraron centros registrados.</div>';
         return;
       }
 
@@ -201,7 +199,6 @@
         const tieneStock = String(c.stockAntiveneno).trim().toUpperCase() === 'SI';
         const badgeClass = tieneStock ? 'badge-si' : 'badge-no';
 
-        // Tarjeta lateral
         const card = document.createElement('div');
         card.className = 'item-card';
         card.innerHTML = `
@@ -216,7 +213,6 @@
         };
         listEl.appendChild(card);
 
-        // Marcador en el mapa con el ícono personalizado solicitado (3304549.png)
         if (c.lat && c.lng) {
           const iconoSalud = L.icon({
             iconUrl: './3304549.png',
@@ -232,7 +228,7 @@
               <b>Localidad:</b> ${c.localidad}<br>
               <b>Stock:</b> <span style="font-weight:bold; color:${tieneStock?'#155724':'#721c24'}">${c.stockAntiveneno || 'NO'}</span><br><br>
               <button onclick="abrirDetalleCentroPorId('${c.id}')" style="background:#0a84ff; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.75rem; width:100%;">
-                🔍 Ver Información Detallada y Foto
+                🔍 Ver Información y Foto
               </button>
             </div>
           `);
@@ -262,7 +258,7 @@
       document.getElementById('det-escorpionicos').innerText = c.antiescorpionicos || "Sin registrar";
 
       const imgEl = document.getElementById('det-foto');
-      if (c.foto) {
+      if (c.foto && c.foto.trim() !== "") {
         imgEl.src = c.foto;
         imgEl.style.display = 'block';
       } else {
@@ -290,11 +286,19 @@
             });
             capaDepartamentos.addTo(map);
             departamentosVisibles = true;
+            actualizarEstiloBoton('btn-toggle-dptos', true, '#0a84ff');
           });
         return;
       }
-      if (departamentosVisibles) { map.removeLayer(capaDepartamentos); departamentosVisibles = false; }
-      else { map.addLayer(capaDepartamentos); departamentosVisibles = true; }
+      if (departamentosVisibles) { 
+        map.removeLayer(capaDepartamentos); 
+        departamentosVisibles = false; 
+        actualizarEstiloBoton('btn-toggle-dptos', false);
+      } else { 
+        map.addLayer(capaDepartamentos); 
+        departamentosVisibles = true; 
+        actualizarEstiloBoton('btn-toggle-dptos', true, '#0a84ff');
+      }
     }
 
     function toggleCapaRegionesSanitarias() {
@@ -310,15 +314,32 @@
             });
             capaRegionesSanitarias.addTo(map);
             regionesSanitariasVisibles = true;
+            actualizarEstiloBoton('btn-toggle-rs', true, '#9b59b6');
           });
         return;
       }
-      if (regionesSanitariasVisibles) { map.removeLayer(capaRegionesSanitarias); regionesSanitariasVisibles = false; }
-      else { map.addLayer(capaRegionesSanitarias); regionesSanitariasVisibles = true; }
+      if (regionesSanitariasVisibles) { 
+        map.removeLayer(capaRegionesSanitarias); 
+        regionesSanitariasVisibles = false; 
+        actualizarEstiloBoton('btn-toggle-rs', false);
+      } else { 
+        map.addLayer(capaRegionesSanitarias); 
+        regionesSanitariasVisibles = true; 
+        actualizarEstiloBoton('btn-toggle-rs', true, '#9b59b6');
+      }
+    }
+
+    function actualizarEstiloBoton(idBtn, activo, colorActivo = '#0a84ff') {
+      const btn = document.getElementById(idBtn);
+      if (btn) {
+        btn.style.background = activo ? colorActivo : '#2c2c2e';
+        btn.style.borderColor = activo ? colorActivo : '#3a3a3c';
+      }
     }
 
     function toggleSidebar() {
-      document.getElementById('sidebar').classList.toggle('collapsed');
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('collapsed');
       setTimeout(() => map.invalidateSize(), 250);
     }
 
