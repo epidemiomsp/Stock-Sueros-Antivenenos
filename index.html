@@ -2,132 +2,516 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="theme-color" content="#f39c12">
+  <meta name="description" content="Stock de Sueros Antiponzoñosos - Vigilancia Epidemiológica - Ministerio de Salud Pública de Corrientes">
   <title>Stock de Sueros Antiponzoñosos - Provincia de Corrientes</title>
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
         onerror="this.onerror=null;this.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';"/>
 
   <style>
     :root {
-      --bg:#f4f6f9; --card:#ffffff; --border:#dcdfe6; --txt:#1c1c1e; --txt-dim:#666666;
-      --primary:#f39c12; /* Naranja institucional */
-      --primary-hover:#d68910;
-      --success:#28a745;
-      --danger:#e63946;
-      --warning:#e9c46a;
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --border: #dcdfe6;
+      --txt: #1c1c1e;
+      --txt-dim: #666666;
+      --primary: #f39c12;
+      --primary-hover: #d68910;
+      --success: #28a745;
+      --danger: #e63946;
+      --warning: #e9c46a;
+      --header-h: 56px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--txt); height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
-    
-    /* Header Institucional Naranja con Letra Negra */
-    header { 
-      background: var(--primary); 
-      border-bottom: 3px solid var(--primary-hover); 
-      padding: 8px 14px; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      z-index: 2000; 
-      min-height: 55px; 
-      gap: 6px; 
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    }
-    .title-area h1 { font-size: 1rem; color: #1c1c1e; line-height: 1.2; font-weight: 800; }
-    .title-area p { font-size: 0.72rem; color: #2c3e50; font-weight: 600; }
-    .header-actions { display: flex; gap: 6px; align-items: center; flex-wrap: nowrap; }
-    .container { display: flex; flex: 1; position: relative; height: calc(100vh - 55px); height: calc(100dvh - 55px); overflow: hidden; }
-    
-    #sidebar { 
-      width: 380px; 
-      background: #ffffff; 
-      color: #1c1c1e;
-      border-right: 1px solid var(--border); 
-      display: flex; 
-      flex-direction: column; 
-      z-index: 1500; 
-      height: 100%; 
-      position: relative;
-      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    #sidebar.collapsed { transform: translateX(-380px); margin-right: -380px; }
-    
-    .tab-bar { display: flex; border-bottom: 1px solid var(--border); background: #f8fafc; min-height: 44px; align-items: center; flex-shrink: 0; }
-    .tab-btn { flex: 1; padding: 10px 2px; font-size: 0.78rem; background: transparent; border: none; color: #475569; cursor: pointer; border-bottom: 2px solid transparent; text-align: center; font-weight: bold; }
-    .tab-btn.active { color: var(--primary-hover); border-bottom-color: var(--primary); background: #ffffff; }
 
-    /* Buscador */
-    .search-bar { padding: 10px; background: #ffffff; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .search-input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.78rem; outline: none; background: #f8fafc; color: #1c1c1e; }
-    .search-input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 2px rgba(243,156,18,0.2); }
-    
-    .list { flex: 1; overflow-y: auto !important; padding: 10px; padding-bottom: 40px; -webkit-overflow-scrolling: touch; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--txt);
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ========== HEADER ========== */
+    header {
+      background: var(--primary);
+      border-bottom: 3px solid var(--primary-hover);
+      padding: 6px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 2000;
+      min-height: var(--header-h);
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      flex-shrink: 0;
+    }
+
+    .title-area {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .title-area h1 {
+      font-size: 0.95rem;
+      color: #1c1c1e;
+      line-height: 1.15;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .title-area p {
+      font-size: 0.68rem;
+      color: #2c3e50;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      flex-shrink: 0;
+      overflow-x: auto;
+      max-width: 55%;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .header-actions::-webkit-scrollbar { display: none; }
+
+    .btn-sec {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 0, 0, 0.18);
+      color: #1c1c1e;
+      padding: 7px 9px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.72rem;
+      white-space: nowrap;
+      font-weight: 700;
+      transition: all 0.15s ease;
+      min-height: 36px;
+      min-width: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+    }
+    .btn-sec:hover, .btn-sec:focus-visible {
+      background: #ffffff;
+      border-color: #1c1c1e;
+      outline: 2px solid var(--primary-hover);
+      outline-offset: 1px;
+    }
+    .btn-sec.active-layer {
+      background: #3498db;
+      color: #fff;
+      border-color: #3498db;
+    }
+
+    /* ========== LAYOUT PRINCIPAL ========== */
+    .container {
+      display: flex;
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    #map {
+      flex: 1;
+      height: 100%;
+      background: #e2e8f0;
+      width: 100%;
+      z-index: 1;
+    }
+
+    /* ========== SIDEBAR ========== */
+    #sidebar {
+      width: 380px;
+      max-width: 100%;
+      background: #ffffff;
+      color: #1c1c1e;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      z-index: 1500;
+      height: 100%;
+      position: relative;
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 2px 0 12px rgba(0,0,0,0.06);
+    }
+    #sidebar.collapsed {
+      transform: translateX(-100%);
+      margin-right: -380px;
+    }
+
+    .sidebar-handle {
+      display: none;
+      height: 20px;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .sidebar-handle::after {
+      content: "";
+      width: 40px;
+      height: 4px;
+      background: #cbd5e1;
+      border-radius: 2px;
+    }
+
+    .tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: #f8fafc;
+      min-height: 44px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 4px;
+      font-size: 0.78rem;
+      background: transparent;
+      border: none;
+      color: #475569;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      text-align: center;
+      font-weight: 700;
+    }
+    .tab-btn.active {
+      color: var(--primary-hover);
+      border-bottom-color: var(--primary);
+      background: #ffffff;
+    }
+
+    .search-bar {
+      padding: 10px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .search-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+      background: #f8fafc;
+      color: #1c1c1e;
+      min-height: 42px;
+    }
+    .search-input:focus {
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(243,156,18,0.2);
+    }
+
+    .list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      padding-bottom: calc(24px + var(--safe-bottom));
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
     .list::-webkit-scrollbar { width: 5px; }
     .list::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-    
-    .item-card { background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; position: relative; font-size: 0.75rem; color: #333; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s ease; }
-    .item-card:hover { border-color: var(--primary); box-shadow: 0 4px 8px rgba(0,0,0,0.08); }
-    .item-title { font-weight: bold; color: #2c3e50; margin-bottom: 2px; font-size: 0.85rem; }
-    .item-sub { color: #64748b; font-size: 0.72rem; margin-top: 2px; }
-    .item-badge { display: inline-block; padding: 3px 6px; border-radius: 4px; font-size: 0.68rem; background: #e5e5ea; color: #333; margin-top: 5px; font-weight: 600; }
-    .badge-si { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
-    .badge-no { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 
-    #map { flex: 1; height: 100%; background: #e2e8f0; width: 100%; z-index: 1; }
-    
-    /* Botones con Texto Negro */
-    .btn-sec { 
-      background: rgba(255, 255, 255, 0.85); 
-      border: 1px solid rgba(0, 0, 0, 0.2); 
-      color: #1c1c1e; 
-      padding: 6px 10px; 
-      border-radius: 6px; 
-      cursor: pointer; 
-      font-size: 0.75rem; 
-      white-space: nowrap; 
-      font-weight: 700; 
-      transition: all 0.2s; 
+    .item-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 8px;
+      position: relative;
+      font-size: 0.8rem;
+      color: #333;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      min-height: 72px;
     }
-    .btn-sec:hover { 
-      background: #ffffff; 
-      border-color: #1c1c1e; 
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+    .item-card:hover, .item-card:focus-visible {
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      outline: none;
     }
-    
-    .dept-tooltip { 
-      background: rgba(15, 23, 42, 0.90) !important; 
-      border: 1px solid var(--success) !important; 
-      color: #ffffff !important; 
-      font-weight: bold; 
-      font-size: 0.82rem; 
-      padding: 5px 9px; 
-      border-radius: 5px; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
+    .item-title {
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 3px;
+      font-size: 0.88rem;
+      line-height: 1.25;
+    }
+    .item-sub {
+      color: #64748b;
+      font-size: 0.75rem;
+      margin-top: 2px;
+    }
+    .item-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      background: #e5e5ea;
+      color: #333;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+    .badge-si {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+    .badge-no {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
     }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 3000; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; padding: 12px; }
-    .modal-overlay.active { opacity: 1; pointer-events: auto; }
-    .modal-box { background: #ffffff; border: 1px solid #ccc; border-radius: 10px; width: 500px; max-width: 95%; padding: 18px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.25); color: #1c1c1e; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; }
-    .modal-header h3 { font-size: 1rem; color: #2c3e50; font-weight: bold; }
-    .close-modal { background: none; border: none; color: #64748b; font-size: 1.4rem; cursor: pointer; }
-    
-    .centro-foto { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; border: 1px solid #e2e8f0; background: #f8fafc; }
-    .detalle-seccion { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; margin-top: 8px; font-size: 0.78rem; line-height: 1.4; }
-    .detalle-seccion b { color: var(--primary-hover); }
+    .last-update {
+      font-size: 0.68rem;
+      color: #64748b;
+      text-align: center;
+      padding: 6px 10px 10px;
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+      background: #f8fafc;
+    }
 
-    #loading { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(15,23,42,0.85); z-index: 2000; display:flex; justify-content:center; align-items:center; color: #fff; font-size: 0.95rem; font-weight: 500; }
-    .off { display: none !important; }
+    /* ========== MODAL ========== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      z-index: 3000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      padding: 0;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-box {
+      background: #ffffff;
+      border-radius: 16px 16px 0 0;
+      width: 100%;
+      max-width: 520px;
+      padding: 16px 18px calc(18px + var(--safe-bottom));
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 -8px 30px rgba(0,0,0,0.2);
+      color: #1c1c1e;
+      transform: translateY(100%);
+      transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .modal-overlay.active .modal-box {
+      transform: translateY(0);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 1;
+    }
+    .modal-header h3 {
+      font-size: 1.05rem;
+      color: #2c3e50;
+      font-weight: 800;
+      padding-right: 12px;
+      line-height: 1.3;
+    }
+    .close-modal {
+      background: #f1f5f9;
+      border: none;
+      color: #475569;
+      font-size: 1.5rem;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .close-modal:hover, .close-modal:focus-visible {
+      background: #e2e8f0;
+      outline: none;
+    }
 
+    .centro-foto {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+    }
+    .detalle-seccion {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 8px;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+    .detalle-seccion b {
+      color: var(--primary-hover);
+    }
+
+    /* ========== LOADING ========== */
+    #loading {
+      position: absolute;
+      inset: 0;
+      background: rgba(15,23,42,0.88);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 500;
+      gap: 12px;
+      text-align: center;
+      padding: 20px;
+    }
+    #loading.off { display: none !important; }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(255,255,255,0.3);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .dept-tooltip {
+      background: rgba(15, 23, 42, 0.92) !important;
+      border: 1px solid var(--success) !important;
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 5px 9px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    /* ========== MOBILE ========== */
     @media (max-width: 768px) {
+      :root { --header-h: 52px; }
+
       .title-area p { display: none; }
-      .title-area h1 { font-size: 0.85rem; }
-      .container { flex-direction: column; }
-      #sidebar { 
-        width: 100% !important; height: 55vh !important; position: absolute; bottom: 0; left: 0; 
-        z-index: 1500; border-top: 1px solid var(--border); transform: translateY(0);
+      .title-area h1 { font-size: 0.82rem; }
+
+      .header-actions {
+        max-width: 62%;
+        gap: 3px;
       }
-      #sidebar.collapsed { transform: translateY(100%) !important; }
+      .btn-sec {
+        padding: 6px 7px;
+        font-size: 0.68rem;
+        min-height: 34px;
+      }
+      .btn-text { display: none; }
+
+      .container {
+        flex-direction: column;
+      }
+
+      #sidebar {
+        width: 100% !important;
+        height: 48vh !important;
+        max-height: 55vh;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 1500;
+        border-right: none;
+        border-top: 1px solid var(--border);
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -6px 24px rgba(0,0,0,0.12);
+        transform: translateY(0);
+        margin-right: 0 !important;
+      }
+      #sidebar.collapsed {
+        transform: translateY(calc(100% - 28px)) !important;
+      }
+
+      .sidebar-handle {
+        display: flex;
+      }
+
+      .modal-overlay {
+        align-items: flex-end;
+      }
+      .modal-box {
+        border-radius: 16px 16px 0 0;
+        max-height: 92vh;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .header-actions { max-width: 58%; }
+      .btn-sec { padding: 5px 6px; font-size: 0.65rem; }
+    }
+
+    /* Desktop modal centrado */
+    @media (min-width: 769px) {
+      .modal-overlay {
+        align-items: center;
+        padding: 16px;
+      }
+      .modal-box {
+        border-radius: 12px;
+        transform: scale(0.95);
+        max-height: 90vh;
+      }
+      .modal-overlay.active .modal-box {
+        transform: scale(1);
+      }
     }
   </style>
 </head>
@@ -136,86 +520,166 @@
   <header>
     <div class="title-area">
       <h1>Stock de Sueros Antiponzoñosos</h1>
-      <p>Vigilancia Epidemiológica - Ministerio de Salud Pública - Corrientes</p>
+      <p>Vigilancia Epidemiológica · Ministerio de Salud Pública · Corrientes</p>
     </div>
-    <div class="header-actions">
-      <button class="btn-sec" id="btn-toggle-centros" onclick="toggleCapaCentros()">🏥 Centros Salud</button>
-      <button class="btn-sec" id="btn-toggle-dptos" onclick="toggleCapaDepartamentos()">🗺️ Departamentos</button>
-      <button class="btn-sec" id="btn-toggle-rs" onclick="toggleCapaRegionesSanitarias()">🏥 Reg.Sanitarias</button>
-      <button class="btn-sec" id="btn-toggle-info" onclick="toggleSidebar()">📊 Info</button>
-      <button class="btn-sec" onclick="cargarDatosActualizados()">🔄</button>
+    <div class="header-actions" role="toolbar" aria-label="Controles del mapa">
+      <button class="btn-sec" id="btn-toggle-centros" onclick="toggleCapaCentros()" aria-pressed="true" title="Mostrar/ocultar centros">
+        🏥 <span class="btn-text">Centros</span>
+      </button>
+      <button class="btn-sec" id="btn-toggle-dptos" onclick="toggleCapaDepartamentos()" aria-pressed="false" title="Departamentos">
+        🗺️ <span class="btn-text">Dptos</span>
+      </button>
+      <button class="btn-sec" id="btn-toggle-rs" onclick="toggleCapaRegionesSanitarias()" aria-pressed="false" title="Regiones Sanitarias">
+        🏥 <span class="btn-text">R.Sanit.</span>
+      </button>
+      <button class="btn-sec" id="btn-toggle-info" onclick="toggleSidebar()" aria-pressed="true" title="Panel de información">
+        📊 <span class="btn-text">Info</span>
+      </button>
+      <button class="btn-sec" onclick="cargarDatosActualizados()" title="Actualizar datos" aria-label="Actualizar stock">
+        🔄
+      </button>
     </div>
   </header>
 
   <div class="container">
-    <div id="loading">Cargando centros de salud y sueros...</div>
-
-    <div id="sidebar">
-      <div class="tab-bar">
-        <button class="tab-btn active">🏥 Centros de Salud y Stock</button>
-      </div>
-      
-      <!-- Buscador -->
-      <div class="search-bar">
-        <input type="text" id="input-buscar-centro" class="search-input" placeholder="🔍 Buscar hospital, localidad o dirección..." oninput="filtrarCentrosPorTexto(this.value)">
-      </div>
-
-      <div class="list" id="list-centros"></div>
+    <div id="loading">
+      <div class="spinner" aria-hidden="true"></div>
+      <div>Cargando centros de salud y stock de sueros…</div>
     </div>
 
-    <div id="map"></div>
+    <div id="sidebar" aria-label="Listado de centros de salud">
+      <div class="sidebar-handle" aria-hidden="true"></div>
+      <div class="tab-bar">
+        <button class="tab-btn active" type="button">🏥 Centros de Salud y Stock</button>
+      </div>
+
+      <div class="search-bar">
+        <input type="search"
+               id="input-buscar-centro"
+               class="search-input"
+               placeholder="🔍 Buscar hospital, localidad o dirección…"
+               oninput="filtrarCentrosPorTexto(this.value)"
+               aria-label="Buscar centros de salud"
+               autocomplete="off">
+      </div>
+
+      <div class="list" id="list-centros" role="list"></div>
+
+      <div class="last-update" id="last-update">Última actualización: —</div>
+    </div>
+
+    <div id="map" role="application" aria-label="Mapa de centros de salud de Corrientes"></div>
   </div>
 
   <!-- Modal Detalle del Centro -->
-  <div class="modal-overlay" id="modalCentroDetalle">
+  <div class="modal-overlay" id="modalCentroDetalle" role="dialog" aria-modal="true" aria-labelledby="det-nombre">
     <div class="modal-box">
       <div class="modal-header">
         <h3 id="det-nombre">Detalle del Centro</h3>
-        <button class="close-modal" onclick="cerrarModal('modalCentroDetalle')">&times;</button>
+        <button class="close-modal" onclick="cerrarModal('modalCentroDetalle')" aria-label="Cerrar">&times;</button>
       </div>
-      <img id="det-foto" class="centro-foto" src="" alt="Foto del Centro de Salud" onerror="this.style.display='none';">
-      <div style="font-size: 0.8rem; line-height: 1.5;">
+      <img id="det-foto" class="centro-foto" src="" alt="Foto del Centro de Salud" onerror="this.style.display='none'">
+      <div style="font-size: 0.85rem; line-height: 1.5;">
         <p><b>Localidad:</b> <span id="det-localidad">–</span></p>
         <p><b>Dirección:</b> <span id="det-direccion">–</span></p>
         <p><b>Teléfono:</b> <span id="det-telefono">–</span></p>
-        <p><b>Stock Antiveneno:</b> <span id="det-stock-general" class="item-badge">–</span></p>
-        
+        <p style="margin-top:6px;"><b>Stock Antiveneno:</b> <span id="det-stock-general" class="item-badge">–</span></p>
+
         <div class="detalle-seccion">
-          <b>Antiofídicos Bivalentes:</b><br><span id="det-bivalentes">Sin registrar</span>
+          <b>Antiofídicos Bivalentes:</b><br>
+          <span id="det-bivalentes">Sin registrar</span>
         </div>
         <div class="detalle-seccion">
-          <b>Antiofídicos Polivalentes:</b><br><span id="det-polivalentes">Sin registrar</span>
+          <b>Antiofídicos Polivalentes:</b><br>
+          <span id="det-polivalentes">Sin registrar</span>
         </div>
         <div class="detalle-seccion">
-          <b>Antiescorpiónicos:</b><br><span id="det-escorpionicos">Sin registrar</span>
+          <b>Antiescorpiónicos:</b><br>
+          <span id="det-escorpionicos">Sin registrar</span>
         </div>
       </div>
-      <div style="margin-top: 15px; text-align: right;">
-        <button type="button" class="btn-sec" style="background:var(--primary-hover); color:#fff; border:none;" onclick="cerrarModal('modalCentroDetalle')">Cerrar</button>
+      <div style="margin-top: 18px; text-align: right;">
+        <button type="button" class="btn-sec"
+                style="background:var(--primary-hover); color:#fff; border:none; min-width:100px;"
+                onclick="cerrarModal('modalCentroDetalle')">
+          Cerrar
+        </button>
       </div>
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"
+          onerror="this.onerror=null;this.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';"></script>
   <script>
+    // ========== ESTADO GLOBAL ==========
     let map = null;
     let markersCentros = [];
     let centrosData = [];
     let centrosVisibles = true;
-    let capaDepartamentos = null, departamentosVisibles = false;
-    let capaRegionesSanitarias = null, regionesSanitariasVisibles = false;
+    let capaDepartamentos = null;
+    let departamentosVisibles = false;
+    let capaRegionesSanitarias = null;
+    let regionesSanitariasVisibles = false;
+    let ultimaCarga = null;
 
     const URL_BASE_DATOS = "https://script.google.com/macros/s/AKfycbzUleqHaFAA4Ohula3UwJmDq9zAmmqwuoAWWVJ6JyO3ZFOjxMnmnQzZA7bxNJ4EVLl-/exec";
 
+    // Icono original de centros de salud (archivo 3304549.png)
+    const ICONO_SALUD = L.icon({
+      iconUrl: './3304549.png',
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+      popupAnchor: [0, -32]
+    });
+
+    // ========== INICIALIZACIÓN ==========
     function initApp() {
-      map = L.map('map', { preferCanvas: true }).setView([-28.5, -57.8], 7);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+      map = L.map('map', {
+        preferCanvas: true,
+        zoomControl: true,
+        attributionControl: true
+      }).setView([-28.5, -57.8], 7);
 
-      setTimeout(() => {
-        if (map) map.invalidateSize();
-      }, 300);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+      }).addTo(map);
 
+      // Redimensionar mapa de forma robusta
+      const resizeMap = () => {
+        if (map) {
+          setTimeout(() => map.invalidateSize({ animate: false }), 80);
+        }
+      };
+      window.addEventListener('resize', resizeMap);
+      window.addEventListener('orientationchange', () => setTimeout(resizeMap, 200));
+
+      // Cerrar modal con Escape
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') cerrarModal('modalCentroDetalle');
+      });
+
+      // Cerrar modal al hacer click fuera
+      document.getElementById('modalCentroDetalle').addEventListener('click', (e) => {
+        if (e.target.id === 'modalCentroDetalle') cerrarModal('modalCentroDetalle');
+      });
+
+      setTimeout(resizeMap, 300);
       cargarDatosActualizados();
+    }
+
+    // ========== CARGA DE DATOS ==========
+    async function fetchConTimeout(url, timeoutMs = 12000) {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const res = await fetch(url, { cache: 'no-store', signal: controller.signal });
+        clearTimeout(id);
+        return res;
+      } catch (err) {
+        clearTimeout(id);
+        throw err;
+      }
     }
 
     async function cargarDatosActualizados() {
@@ -223,72 +687,91 @@
       if (loadingEl) loadingEl.classList.remove('off');
 
       try {
-        const res = await fetch(URL_BASE_DATOS, { cache: 'no-store' });
-        const data = await res.json();
-        centrosData = data.centros || [];
+        let data = null;
+        try {
+          const res = await fetchConTimeout(URL_BASE_DATOS);
+          data = await res.json();
+        } catch (errDirecto) {
+          console.warn('Fetch directo falló, intentando proxy…', errDirecto);
+          const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(URL_BASE_DATOS);
+          const resProxy = await fetchConTimeout(proxyUrl, 15000);
+          data = await resProxy.json();
+        }
+
+        centrosData = Array.isArray(data.centros) ? data.centros : [];
+        ultimaCarga = new Date();
+        actualizarMarcaTiempo();
         renderCentros(centrosData);
       } catch (err) {
-        console.warn("Fallo fetch directo por CORS, reintentando vía proxy...", err);
-        try {
-          const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(URL_BASE_DATOS);
-          const resProxy = await fetch(proxyUrl);
-          const data = await resProxy.json();
-          centrosData = data.centros || [];
-          renderCentros(centrosData);
-        } catch (errProxy) {
-          console.error("Error al cargar centros:", errProxy);
+        console.error('Error al cargar centros:', err);
+        const listEl = document.getElementById('list-centros');
+        if (listEl) {
+          listEl.innerHTML = `
+            <div style="color:#991b1b; font-size:0.85rem; text-align:center; padding:20px;">
+              No se pudieron cargar los datos.<br>
+              <button class="btn-sec" style="margin-top:12px;" onclick="cargarDatosActualizados()">
+                🔄 Reintentar
+              </button>
+            </div>`;
         }
       } finally {
         if (loadingEl) loadingEl.classList.add('off');
       }
     }
 
+    function actualizarMarcaTiempo() {
+      const el = document.getElementById('last-update');
+      if (!el || !ultimaCarga) return;
+      const opts = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+      el.textContent = 'Última actualización: ' + ultimaCarga.toLocaleString('es-AR', opts);
+    }
+
+    // ========== RENDER CENTROS ==========
     function renderCentros(centros) {
       const listEl = document.getElementById('list-centros');
       listEl.innerHTML = '';
+
+      // Limpiar markers anteriores
       markersCentros.forEach(m => { if (map) map.removeLayer(m); });
       markersCentros = [];
 
       if (!centros || centros.length === 0) {
-        listEl.innerHTML = '<div style="color:#666; font-size:0.75rem; text-align:center; padding:15px;">No se encontraron centros registrados.</div>';
+        listEl.innerHTML = '<div style="color:#666; font-size:0.8rem; text-align:center; padding:20px;">No se encontraron centros registrados.</div>';
         return;
       }
 
       centros.forEach(c => {
-        const tieneStock = String(c.stockAntiveneno).trim().toUpperCase() === 'SI';
+        const tieneStock = String(c.stockAntiveneno || '').trim().toUpperCase() === 'SI';
         const badgeClass = tieneStock ? 'badge-si' : 'badge-no';
 
         const card = document.createElement('div');
         card.className = 'item-card';
+        card.setAttribute('role', 'listitem');
+        card.tabIndex = 0;
         card.innerHTML = `
-          <div class="item-title">🏥 ${c.nombre}</div>
-          <div class="item-sub">📍 ${c.localidad} | 📞 ${c.telefono || 'S/D'}</div>
-          <div class="item-badge ${badgeClass}">Stock Antiveneno: ${c.stockAntiveneno || 'NO'}</div>
+          <div class="item-title">🏥 ${escapeHtml(c.nombre || 'Sin nombre')}</div>
+          <div class="item-sub">📍 ${escapeHtml(c.localidad || '–')} · 📞 ${escapeHtml(c.telefono || 'S/D')}</div>
+          <div class="item-badge ${badgeClass}">Stock Antiveneno: ${escapeHtml(c.stockAntiveneno || 'NO')}</div>
         `;
-        card.onclick = () => {
+        const abrir = () => {
           abrirDetalleCentro(c);
-          if (c.lat && c.lng && map) map.flyTo([c.lat, c.lng], 14);
-          if (window.innerWidth <= 768) toggleSidebar();
+          if (c.lat && c.lng && map) map.flyTo([c.lat, c.lng], 14, { duration: 0.8 });
         };
+        card.onclick = abrir;
+        card.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrir(); } };
         listEl.appendChild(card);
 
         if (c.lat && c.lng && map) {
-          const iconoSalud = L.icon({
-            iconUrl: './3304549.png',
-            iconSize: [36, 36],
-            iconAnchor: [18, 36],
-            popupAnchor: [0, -32]
-          });
-
-          const marker = L.marker([c.lat, c.lng], { icon: iconoSalud });
+          const marker = L.marker([c.lat, c.lng], { icon: ICONO_SALUD });
           if (centrosVisibles) marker.addTo(map);
 
           marker.bindPopup(`
-            <div style="color:#000; min-width: 200px;">
-              <b style="font-size:0.95rem; color:#d68910;">${c.nombre}</b><br>
-              <b>Localidad:</b> ${c.localidad}<br>
-              <b>Stock:</b> <span style="font-weight:bold; color:${tieneStock?'#166534':'#991b1b'}">${c.stockAntiveneno || 'NO'}</span><br><br>
-              <button onclick="abrirDetalleCentroPorId('${c.id}')" style="background:#f39c12; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:0.75rem; width:100%;">
+            <div style="color:#000; min-width:200px; font-size:0.85rem;">
+              <b style="font-size:0.95rem; color:#d68910;">${escapeHtml(c.nombre)}</b><br>
+              <b>Localidad:</b> ${escapeHtml(c.localidad)}<br>
+              <b>Stock:</b> <span style="font-weight:700; color:${tieneStock ? '#166534' : '#991b1b'}">${escapeHtml(c.stockAntiveneno || 'NO')}</span><br><br>
+              <button onclick="abrirDetalleCentroPorId('${String(c.id).replace(/'/g, "\\'")}')"
+                      style="background:#f39c12; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:700; font-size:0.8rem; width:100%; min-height:40px;">
                 🔍 Ver Información y Foto
               </button>
             </div>
@@ -300,26 +783,35 @@
       actualizarEstiloBoton('btn-toggle-centros', centrosVisibles, '#3498db', '#ffffff');
     }
 
+    function escapeHtml(str) {
+      if (str == null) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // ========== TOGGLES DE CAPAS ==========
     function toggleCapaCentros() {
       if (!map) return;
       centrosVisibles = !centrosVisibles;
       markersCentros.forEach(m => {
-        if (centrosVisibles) {
-          map.addLayer(m);
-        } else {
-          map.removeLayer(m);
-        }
+        if (centrosVisibles) map.addLayer(m);
+        else map.removeLayer(m);
       });
       actualizarEstiloBoton('btn-toggle-centros', centrosVisibles, '#3498db', '#ffffff');
+      document.getElementById('btn-toggle-centros').setAttribute('aria-pressed', centrosVisibles);
     }
 
     function filtrarCentrosPorTexto(texto) {
-      const filtro = texto.toLowerCase().trim();
+      const filtro = (texto || '').toLowerCase().trim();
       if (!filtro) {
         renderCentros(centrosData);
         return;
       }
-      const filtrados = centrosData.filter(c => 
+      const filtrados = centrosData.filter(c =>
         (c.nombre && c.nombre.toLowerCase().includes(filtro)) ||
         (c.localidad && c.localidad.toLowerCase().includes(filtro)) ||
         (c.direccion && c.direccion.toLowerCase().includes(filtro))
@@ -333,29 +825,31 @@
     }
 
     function abrirDetalleCentro(c) {
-      document.getElementById('det-nombre').innerText = c.nombre || "Centro de Salud";
-      document.getElementById('det-localidad').innerText = c.localidad || "Corrientes";
-      document.getElementById('det-direccion').innerText = c.direccion || "S/D";
-      document.getElementById('det-telefono').innerText = c.telefono || "S/D";
-      
+      document.getElementById('det-nombre').textContent = c.nombre || 'Centro de Salud';
+      document.getElementById('det-localidad').textContent = c.localidad || 'Corrientes';
+      document.getElementById('det-direccion').textContent = c.direccion || 'S/D';
+      document.getElementById('det-telefono').textContent = c.telefono || 'S/D';
+
       const badge = document.getElementById('det-stock-general');
-      const tieneStock = String(c.stockAntiveneno).trim().toUpperCase() === 'SI';
-      badge.innerText = c.stockAntiveneno || 'NO';
+      const tieneStock = String(c.stockAntiveneno || '').trim().toUpperCase() === 'SI';
+      badge.textContent = c.stockAntiveneno || 'NO';
       badge.className = `item-badge ${tieneStock ? 'badge-si' : 'badge-no'}`;
 
-      document.getElementById('det-bivalentes').innerText = c.antiofidicosBivalentes || "Sin registrar";
-      document.getElementById('det-polivalentes').innerText = c.antiofidicosPolivalentes || "Sin registrar";
-      document.getElementById('det-escorpionicos').innerText = c.antiescorpionicos || "Sin registrar";
+      document.getElementById('det-bivalentes').textContent = c.antiofidicosBivalentes || 'Sin registrar';
+      document.getElementById('det-polivalentes').textContent = c.antiofidicosPolivalentes || 'Sin registrar';
+      document.getElementById('det-escorpionicos').textContent = c.antiescorpionicos || 'Sin registrar';
 
       const imgEl = document.getElementById('det-foto');
-      if (c.foto && c.foto.trim() !== "") {
+      if (c.foto && String(c.foto).trim() !== '') {
         imgEl.src = c.foto;
         imgEl.style.display = 'block';
       } else {
         imgEl.style.display = 'none';
+        imgEl.removeAttribute('src');
       }
 
       document.getElementById('modalCentroDetalle').classList.add('active');
+      setTimeout(() => document.querySelector('#modalCentroDetalle .close-modal')?.focus(), 100);
     }
 
     function cerrarModal(id) {
@@ -366,49 +860,72 @@
       if (!map) return;
       if (!capaDepartamentos) {
         fetch('./corrientes.json')
-          .then(res => res.json())
+          .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
           .then(data => {
             capaDepartamentos = L.geoJSON(data, {
-              style: () => ({ color: '#005c8a', weight: 1.8, opacity: 0.9, fillColor: '#005c8a', fillOpacity: 0.15 }),
+              style: () => ({
+                color: '#005c8a',
+                weight: 1.8,
+                opacity: 0.9,
+                fillColor: '#005c8a',
+                fillOpacity: 0.12
+              }),
               onEachFeature: (feature, layer) => {
                 const p = feature.properties || {};
-                layer.bindTooltip(`Dpto. ${p.nam || p.nombre || 'Corrientes'}`, { permanent: false, direction: 'center', className: 'dept-tooltip' });
+                layer.bindTooltip(`Dpto. ${p.nam || p.nombre || 'Corrientes'}`, {
+                  permanent: false,
+                  direction: 'center',
+                  className: 'dept-tooltip'
+                });
               }
             });
             capaDepartamentos.addTo(map);
             departamentosVisibles = true;
             actualizarEstiloBoton('btn-toggle-dptos', true, '#005c8a', '#ffffff');
+            document.getElementById('btn-toggle-dptos').setAttribute('aria-pressed', 'true');
+          })
+          .catch(err => {
+            console.error('Error al cargar departamentos:', err);
+            alert('No se pudo cargar la capa de departamentos. Verifique que exista corrientes.json');
           });
         return;
       }
-      if (departamentosVisibles) { 
-        map.removeLayer(capaDepartamentos); 
-        departamentosVisibles = false; 
+
+      if (departamentosVisibles) {
+        map.removeLayer(capaDepartamentos);
+        departamentosVisibles = false;
         actualizarEstiloBoton('btn-toggle-dptos', false);
-      } else { 
-        map.addLayer(capaDepartamentos); 
-        departamentosVisibles = true; 
+        document.getElementById('btn-toggle-dptos').setAttribute('aria-pressed', 'false');
+      } else {
+        map.addLayer(capaDepartamentos);
+        departamentosVisibles = true;
         actualizarEstiloBoton('btn-toggle-dptos', true, '#005c8a', '#ffffff');
+        document.getElementById('btn-toggle-dptos').setAttribute('aria-pressed', 'true');
       }
     }
 
-    /* Carga de Regiones Sanitarias directamente del archivo regiones_sanitarias.json */
     function toggleCapaRegionesSanitarias() {
       if (!map) return;
       if (!capaRegionesSanitarias) {
         fetch('./regiones_sanitarias.json')
-          .then(res => res.json())
+          .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+          })
           .then(data => {
             capaRegionesSanitarias = L.geoJSON(data, {
-              style: function() {
-                return {
-                  color: '#28a745',      // Verde para las líneas de regiones sanitarias
-                  weight: 3,
-                  opacity: 0.95
-                };
-              },
-              onEachFeature: function(feature, layer) {
-                layer.bindTooltip(`<b>Región Sanitaria</b>`, {
+              style: () => ({
+                color: '#28a745',
+                weight: 3,
+                opacity: 0.95,
+                fillOpacity: 0.05
+              }),
+              onEachFeature: (feature, layer) => {
+                const nombre = feature.properties?.nombre || feature.properties?.name || 'Región Sanitaria';
+                layer.bindTooltip(`<b>${nombre}</b>`, {
                   permanent: false,
                   direction: 'center',
                   className: 'dept-tooltip'
@@ -418,40 +935,55 @@
             capaRegionesSanitarias.addTo(map);
             regionesSanitariasVisibles = true;
             actualizarEstiloBoton('btn-toggle-rs', true, '#28a745', '#ffffff');
+            document.getElementById('btn-toggle-rs').setAttribute('aria-pressed', 'true');
           })
-          .catch(err => console.error("Error al cargar regiones sanitarias:", err));
+          .catch(err => {
+            console.error('Error al cargar regiones sanitarias:', err);
+            alert('No se pudo cargar la capa de regiones sanitarias. Verifique que exista regiones_sanitarias.json');
+          });
         return;
       }
 
-      if (regionesSanitariasVisibles) { 
-        map.removeLayer(capaRegionesSanitarias); 
-        regionesSanitariasVisibles = false; 
+      if (regionesSanitariasVisibles) {
+        map.removeLayer(capaRegionesSanitarias);
+        regionesSanitariasVisibles = false;
         actualizarEstiloBoton('btn-toggle-rs', false);
-      } else { 
-        map.addLayer(capaRegionesSanitarias); 
-        regionesSanitariasVisibles = true; 
+        document.getElementById('btn-toggle-rs').setAttribute('aria-pressed', 'false');
+      } else {
+        map.addLayer(capaRegionesSanitarias);
+        regionesSanitariasVisibles = true;
         actualizarEstiloBoton('btn-toggle-rs', true, '#28a745', '#ffffff');
+        document.getElementById('btn-toggle-rs').setAttribute('aria-pressed', 'true');
       }
     }
 
     function actualizarEstiloBoton(idBtn, activo, colorActivo = '#f39c12', colorTextoActivo = '#ffffff') {
       const btn = document.getElementById(idBtn);
-      if (btn) {
-        btn.style.background = activo ? colorActivo : 'rgba(255,255,255,0.85)';
-        btn.style.color = activo ? colorTextoActivo : '#1c1c1e';
-        btn.style.borderColor = activo ? colorActivo : 'rgba(0,0,0,0.2)';
+      if (!btn) return;
+      if (activo) {
+        btn.style.background = colorActivo;
+        btn.style.color = colorTextoActivo;
+        btn.style.borderColor = colorActivo;
+        btn.classList.add('active-layer');
+      } else {
+        btn.style.background = 'rgba(255,255,255,0.9)';
+        btn.style.color = '#1c1c1e';
+        btn.style.borderColor = 'rgba(0,0,0,0.18)';
+        btn.classList.remove('active-layer');
       }
     }
 
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
-      sidebar.classList.toggle('collapsed');
+      const collapsed = sidebar.classList.toggle('collapsed');
+      document.getElementById('btn-toggle-info').setAttribute('aria-pressed', !collapsed);
       if (map) {
-        setTimeout(() => map.invalidateSize(), 250);
+        setTimeout(() => map.invalidateSize({ animate: false }), 280);
       }
     }
 
-    window.onload = initApp;
+    // ========== ARRANQUE ==========
+    window.addEventListener('load', initApp);
   </script>
 </body>
 </html>
