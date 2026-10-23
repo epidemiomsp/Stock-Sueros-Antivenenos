@@ -177,12 +177,23 @@
       if (loadingEl) loadingEl.classList.remove('off');
 
       try {
+        // Intento directo a Apps Script
         const res = await fetch(URL_BASE_DATOS, { cache: 'no-store' });
         const data = await res.json();
         centrosData = data.centros || [];
         renderCentros(centrosData);
       } catch (err) {
-        console.error("Error al cargar datos de Apps Script:", err);
+        console.warn("Fallo fetch directo por política CORS, reintentando vía proxy...", err);
+        try {
+          // Fallback seguro usando proxy público
+          const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(URL_BASE_DATOS);
+          const resProxy = await fetch(proxyUrl);
+          const data = await resProxy.json();
+          centrosData = data.centros || [];
+          renderCentros(centrosData);
+        } catch (errProxy) {
+          console.error("Error crítico al cargar centros de salud:", errProxy);
+        }
       } finally {
         if (loadingEl) loadingEl.classList.add('off');
       }
@@ -191,7 +202,7 @@
     function renderCentros(centros) {
       const listEl = document.getElementById('list-centros');
       listEl.innerHTML = '';
-      markersCentros.forEach(m => map.removeLayer(m));
+      markersCentros.forEach(m => { if (map) map.removeLayer(m); });
       markersCentros = [];
 
       if (!centros || centros.length === 0) {
