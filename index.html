@@ -11,16 +11,16 @@
   <style>
     :root {
       --bg:#f4f6f9; --card:#ffffff; --border:#dcdfe6; --txt:#1c1c1e; --txt-dim:#666666;
-      --primary:#f39c12; /* Naranja oficial de la paleta del Ministerio */
+      --primary:#f39c12; /* Naranja institucional */
       --primary-hover:#d68910;
-      --success:#28a745; /* Verde institucional de Regiones Sanitarias */
+      --success:#28a745;
       --danger:#e63946;
       --warning:#e9c46a;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background: var(--bg); color: var(--txt); height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
     
-    /* Header Institucional Naranja con Textos y Letras en Negro */
+    /* Header Institucional Naranja con Letra Negra */
     header { 
       background: var(--primary); 
       border-bottom: 3px solid var(--primary-hover); 
@@ -56,7 +56,7 @@
     .tab-btn { flex: 1; padding: 10px 2px; font-size: 0.78rem; background: transparent; border: none; color: #475569; cursor: pointer; border-bottom: 2px solid transparent; text-align: center; font-weight: bold; }
     .tab-btn.active { color: var(--primary-hover); border-bottom-color: var(--primary); background: #ffffff; }
 
-    /* Buscador en tiempo real */
+    /* Buscador */
     .search-bar { padding: 10px; background: #ffffff; border-bottom: 1px solid var(--border); flex-shrink: 0; }
     .search-input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 0.78rem; outline: none; background: #f8fafc; color: #1c1c1e; }
     .search-input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 2px rgba(243,156,18,0.2); }
@@ -75,7 +75,7 @@
 
     #map { flex: 1; height: 100%; background: #e2e8f0; width: 100%; z-index: 1; }
     
-    /* Botones de Cabecera en Texto Negro y Fondo Claro Transparente */
+    /* Botones con Texto Negro */
     .btn-sec { 
       background: rgba(255, 255, 255, 0.85); 
       border: 1px solid rgba(0, 0, 0, 0.2); 
@@ -155,7 +155,7 @@
         <button class="tab-btn active">🏥 Centros de Salud y Stock</button>
       </div>
       
-      <!-- Buscador en tiempo real -->
+      <!-- Buscador -->
       <div class="search-bar">
         <input type="text" id="input-buscar-centro" class="search-input" placeholder="🔍 Buscar hospital, localidad o dirección..." oninput="filtrarCentrosPorTexto(this.value)">
       </div>
@@ -201,22 +201,11 @@
     let map = null;
     let markersCentros = [];
     let centrosData = [];
-    let centrosVisibles = true; // Control de la capa de centros de salud
+    let centrosVisibles = true;
     let capaDepartamentos = null, departamentosVisibles = false;
     let capaRegionesSanitarias = null, regionesSanitariasVisibles = false;
 
     const URL_BASE_DATOS = "https://script.google.com/macros/s/AKfycbzUleqHaFAA4Ohula3UwJmDq9zAmmqwuoAWWVJ6JyO3ZFOjxMnmnQzZA7bxNJ4EVLl-/exec";
-
-    // Asignación oficial de Departamentos a Regiones Sanitarias de Corrientes
-    const MAPEO_DEPTOS_A_REGION = {
-      'capital': 'I', 'empedrado': 'I', 'itati': 'I', 'san cosme': 'I', 'san luis del palmar': 'I',
-      'bella vista': 'II', 'concepcion': 'II', 'mburucuya': 'II', 'saladas': 'II', 'san roque': 'II',
-      'esquina': 'III', 'goya': 'III', 'lavalle': 'III',
-      'curuzu cuatia': 'IV', 'mercedes': 'IV', 'sauce': 'IV',
-      'general alvear': 'V', 'santo tome': 'V', 'san martin': 'V',
-      'monte caseros': 'VI', 'paso de los libres': 'VI',
-      'ituzaingo': 'VII', 'san miguel': 'VII', 'general paz': 'VII', 'beron de astrada': 'VII'
-    };
 
     function initApp() {
       map = L.map('map', { preferCanvas: true }).setView([-28.5, -57.8], 7);
@@ -311,7 +300,6 @@
       actualizarEstiloBoton('btn-toggle-centros', centrosVisibles, '#3498db', '#ffffff');
     }
 
-    // Función para mostrar / ocultar los marcadores de los Centros de Salud en el Mapa
     function toggleCapaCentros() {
       if (!map) return;
       centrosVisibles = !centrosVisibles;
@@ -404,52 +392,26 @@
       }
     }
 
+    /* Carga de Regiones Sanitarias directamente del archivo regiones_sanitarias.json */
     function toggleCapaRegionesSanitarias() {
       if (!map) return;
       if (!capaRegionesSanitarias) {
-        fetch('./corrientes.json')
+        fetch('./regiones_sanitarias.json')
           .then(res => res.json())
           .then(data => {
             capaRegionesSanitarias = L.geoJSON(data, {
               style: function() {
                 return {
-                  color: '#28a745',      // Verde oficial de la regionalización sanitaria
-                  weight: 2.5,
-                  opacity: 0.95,
-                  fillColor: '#28a745',
-                  fillOpacity: 0.15
+                  color: '#28a745',      // Verde para las líneas de regiones sanitarias
+                  weight: 3,
+                  opacity: 0.95
                 };
               },
               onEachFeature: function(feature, layer) {
-                const props = feature.properties || {};
-                const nombreDepto = String(props.nam || props.nombre || '').toLowerCase().trim();
-                const romano = MAPEO_DEPTOS_A_REGION[nombreDepto] || 'I';
-                const nombreRegion = `Región Sanitaria Nº ${romano}`;
-
-                layer.bindTooltip(`<b>${nombreRegion}</b><br><span style="font-size:0.7rem; font-weight:normal;">Dpto. ${props.nam || props.nombre}</span>`, {
+                layer.bindTooltip(`<b>Región Sanitaria</b>`, {
                   permanent: false,
                   direction: 'center',
                   className: 'dept-tooltip'
-                });
-
-                layer.on({
-                  mouseover: function(e) {
-                    const l = e.target;
-                    l.setStyle({
-                      weight: 4.5,
-                      color: '#155724',
-                      fillOpacity: 0.38
-                    });
-                    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-                      l.bringToFront();
-                    }
-                  },
-                  mouseout: function(e) {
-                    capaRegionesSanitarias.resetStyle(e.target);
-                  },
-                  click: function(e) {
-                    map.fitBounds(e.target.getBounds(), { padding: [20, 20] });
-                  }
                 });
               }
             });
